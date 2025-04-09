@@ -13,10 +13,6 @@ const Router = express.Router();
 // add protect func to all routes
 Router.use(protect);
 
-Router.route("/")
-	.post(createFarm)
-	.get(userFarms)
-	.delete(deletefarm)
-	.patch(updateFarm);
-Router.get("/:id", getFarm);
+Router.route("/").post(createFarm).get(userFarms);
+Router.route("/:id").get(getFarm).delete(deletefarm).patch(updateFarm);
 export default Router;
