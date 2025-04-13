@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors";
 import dotenv from "dotenv";
 import dbConnect from "./db/dataBase.js";
 import rateLimit from "express-rate-limit";
@@ -6,9 +7,11 @@ import helmet from "helmet";
 import mongoSanitize from "express-mongo-sanitize";
 import xss from "xss-clean";
 import hpp from "hpp";
+import cookieParser from "cookie-parser";
 dotenv.config();
 export const app = express();
 
+app.use(cors());
 // set security HTTP headers.
 app.use(helmet());
 
@@ -23,6 +26,8 @@ app.use("/api", limiter);
 // body pareser, reading date from body into req.body
 app.use(express.json({ limit: "10kb" }));
 
+// from cookie
+app.use(cookieParser());
 //Data sanitization against noSQL query injection
 app.use(mongoSanitize());
 
