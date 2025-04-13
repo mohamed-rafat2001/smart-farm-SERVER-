@@ -1,6 +1,7 @@
 import UserModel from "../models/user.js";
 
 import response from "../utils/handelRespone.js";
+import sendCookie from "../utils/sendCookie.js";
 import sendEmail from "../utils/email.js";
 import crypto from "crypto";
 import catchAsync from "../middelwares/catchAsync.js";
@@ -19,6 +20,7 @@ export const signUp = catchAsync(async (req, res, next) => {
 
 	const token = user.createJwt();
 
+	sendCookie(res, token);
 	response(res, 201, { user, token });
 });
 
@@ -35,6 +37,7 @@ export const login = catchAsync(async (req, res, next) => {
 
 	const token = user.createJwt();
 
+	sendCookie(res, token);
 	response(res, 200, { token });
 });
 // forgot password using email
@@ -79,6 +82,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 	await user.save();
 	const token = user.createJwt();
 
+	sendCookie(res, token);
 	response(res, 200, { user, token });
 });
 // update password

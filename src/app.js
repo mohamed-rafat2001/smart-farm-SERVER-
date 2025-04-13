@@ -1,11 +1,37 @@
 import express from "express";
 import dotenv from "dotenv";
-
 import dbConnect from "./db/dataBase.js";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import mongoSanitize from "express-mongo-sanitize";
+import xss from "xss-clean";
+import hpp from "hpp";
 dotenv.config();
 export const app = express();
 
-app.use(express.json());
+// set security HTTP headers.
+app.use(helmet());
+
+//limit requests from same API
+const limiter = rateLimit({
+	max: 100,
+	windowMs: 60 * 60 * 1000,
+	message: "too many requests for this IP, Please try again in an hour ",
+});
+app.use("/api", limiter);
+
+// body pareser, reading date from body into req.body
+app.use(express.json({ limit: "10kb" }));
+
+//Data sanitization against noSQL query injection
+app.use(mongoSanitize());
+
+//Data sanitization against xss
+app.use(xss());
+
+// Prevent parameter pollution
+app.use(hpp());
+// Routers
 import userRoute from "./routers/userRoute.js";
 import authRouter from "./routers/authRouter.js";
 import farmRouter from "./routers/farmRouter.js";
