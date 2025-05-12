@@ -35,7 +35,7 @@ export const getAllDocs = (Model) =>
 
 		if (!docs) return next(new appError("docs not found", 404));
 
-		response(res, 200, { docs, results: users.length });
+		response(res, 200, { docs, results: docs.length });
 	});
 
 // get doc by owner
