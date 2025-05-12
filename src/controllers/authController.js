@@ -1,5 +1,5 @@
 import UserModel from "../models/user.js";
-
+import appError from "../utils/appError.js";
 import response from "../utils/handelRespone.js";
 import sendCookie from "../utils/sendCookie.js";
 import sendEmail from "../utils/email.js";
@@ -17,7 +17,7 @@ export const signUp = catchAsync(async (req, res, next) => {
 		confirmPassword,
 		phoneNumber,
 	});
-
+	if (!user) return next(appError("user not signUp", 400));
 	const token = user.createJwt();
 
 	sendCookie(res, token);
@@ -28,12 +28,13 @@ export const signUp = catchAsync(async (req, res, next) => {
 export const login = catchAsync(async (req, res, next) => {
 	const { email, password } = req.body;
 	// check if email and password exist
-	if (!email || !password) return res.send("please provide email and password");
+	if (!email || !password)
+		return next(appError("please provide email and password", 400));
 	// check if user is exist and password is correct
 	const user = await UserModel.findOne({ email }).select("+password");
 
 	if (!user || !user.isCorrectPass(password, user.password))
-		return res.send("email or password is wrong");
+		return next(appError("email or password is wrong", 400));
 
 	const token = user.createJwt();
 
@@ -45,7 +46,7 @@ export const forgotPassord = catchAsync(async (req, res, next) => {
 	const { email } = req.body;
 	// find the user by email
 	const user = await UserModel.findOne({ email });
-	if (!user) return res.send("user not found");
+	if (!user) return next(appError("user not found", 404));
 	// create random token
 	const resetToken = user.createPasswordResetToken();
 	await user.save({ validateBeforeSave: false });
@@ -73,7 +74,7 @@ export const resetPassword = catchAsync(async (req, res, next) => {
 		passwordResetExpires: { $gt: Date.now() },
 	});
 	// check if user or not
-	if (!user) return res.send("token is invalid or has expired");
+	if (!user) return next(appError("token is invalid or has expired", 400));
 
 	user.password = req.body.password;
 	user.confirmPassword = req.body.confirmPassword;
@@ -91,7 +92,7 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 	const user = await UserModel.findById(req.user._id).select("+password");
 	const correctPass = await user.isCorrectPass(password, user.password);
 
-	if (!correctPass) return res.send("pass is wrong");
+	if (!correctPass) return next(appError("password is incorrect", 400));
 
 	user.password = newPassword;
 	user.confirmPassword = confirmNewPassword;

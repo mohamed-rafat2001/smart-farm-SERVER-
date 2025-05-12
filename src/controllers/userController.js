@@ -10,10 +10,10 @@ export const getAllUsers = getAllDocs(UserModel);
 
 //get user by id
 export const getUserById = catchAsync(async (req, res, next) => {
-	const { _id } = req.body;
-	const user = await UserModel.findById(_id);
+	const { id } = req.body;
+	const user = await UserModel.findById(id);
 
-	if (!user || !_id) return next(new appError("user not found", 404));
+	if (!user || !id) return next(new appError("user not found", 404));
 
 	response(res, 200, user);
 });
