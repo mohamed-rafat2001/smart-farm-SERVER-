@@ -11,7 +11,18 @@ import cookieParser from "cookie-parser";
 dotenv.config();
 export const app = express();
 
-app.use(cors());
+app.use(
+	cors({
+		origin: "http://localhost:5173",
+		credentials: true,
+		allowedHeaders: [
+			"Content-Type",
+			"Authorization",
+			"Content-Length",
+			"X-Requested-With",
+		],
+	})
+);
 // set security HTTP headers.
 app.use(helmet());
 

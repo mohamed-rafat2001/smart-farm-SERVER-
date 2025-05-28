@@ -19,7 +19,7 @@ export const signUp = catchAsync(async (req, res, next) => {
 	});
 	if (!user) return next(appError("user not signUp", 400));
 	const token = user.createJwt();
-
+	user.password = undefined;
 	sendCookie(res, token);
 	response(res, 201, { user, token });
 });
@@ -33,13 +33,18 @@ export const login = catchAsync(async (req, res, next) => {
 	// check if user is exist and password is correct
 	const user = await UserModel.findOne({ email }).select("+password");
 
-	if (!user || !user.isCorrectPass(password, user.password))
-		return next(appError("email or password is wrong", 400));
+	if (!user || !(await user.isCorrectPass(password, user.password)))
+		return next(new appError("email or password is wrong", 400));
 
 	const token = user.createJwt();
 
 	sendCookie(res, token);
-	response(res, 200, { token });
+	response(res, 200, { token, user });
+});
+// logout user
+export const logOut = catchAsync(async (req, res, next) => {
+	sendCookie(res, "");
+	response(res, 200, {});
 });
 // forgot password using email
 export const forgotPassord = catchAsync(async (req, res, next) => {
@@ -92,12 +97,12 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 	const user = await UserModel.findById(req.user._id).select("+password");
 	const correctPass = await user.isCorrectPass(password, user.password);
 
-	if (!correctPass) return next(appError("password is incorrect", 400));
+	if (!correctPass) return next(new appError("password is incorrect", 400));
 
 	user.password = newPassword;
 	user.confirmPassword = confirmNewPassword;
-
-	await user.save();
 	const token = user.createJwt();
+	await user.save();
+
 	response(res, 201, { user, token });
 });

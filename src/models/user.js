@@ -97,7 +97,8 @@ userSchema.methods.createJwt = function () {
 };
 // compare password to login
 userSchema.methods.isCorrectPass = async (password, userPassword) => {
-	return await bcrypt.compare(password, userPassword);
+	const hash = await bcrypt.compare(password, userPassword);
+	return hash;
 };
 // create password reset token
 userSchema.methods.createPasswordResetToken = function () {
@@ -109,4 +110,5 @@ userSchema.methods.createPasswordResetToken = function () {
 	this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
 	return resetToken;
 };
+
 export default mongoose.model("UserModel", userSchema);
