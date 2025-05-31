@@ -16,7 +16,7 @@ export const protect = catchAsync(async (req, res, next) => {
 	if (!token) return next(new appError("no token", 400));
 	// verification token
 
-	const decode = await jwt.verify(token, process.env.JWTKEY);
+	const decode = jwt.verify(token, process.env.JWTKEY);
 
 	// check if user still exist
 	const user = await userModel.findById(decode._id);
@@ -31,7 +31,9 @@ export const protect = catchAsync(async (req, res, next) => {
 export const restrictTo = (...roles) => {
 	return (req, res, next) => {
 		if (!roles.includes(req.user.role)) {
-			return next("you don't have permission to perform this action", 400);
+			return next(
+				new appError("you don't have permission to perform this action", 400)
+			);
 		}
 		next();
 	};

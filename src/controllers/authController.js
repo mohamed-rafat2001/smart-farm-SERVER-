@@ -103,6 +103,6 @@ export const updatePassword = catchAsync(async (req, res, next) => {
 	user.confirmPassword = confirmNewPassword;
 	const token = user.createJwt();
 	await user.save();
-
+	sendCookie(res, token);
 	response(res, 201, { user, token });
 });
